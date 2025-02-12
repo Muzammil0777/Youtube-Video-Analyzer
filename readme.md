@@ -19,7 +19,7 @@ A streamlined AI tool that automatically analyzes YouTube videos and generates c
 - Supported by Hugging Face Spaces
 
 ## Usage
-1. Visit the Hugging Face Space
+1. Visit the link: https://youtube-video-analyzer-a97uwsq2srgptrczjnmv3s.streamlit.app/
 2. Paste a YouTube video URL
 3. Click "Analyze Video" to get instant insights
 
