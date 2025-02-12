@@ -5,6 +5,7 @@ import requests
 import json
 from youtube_transcript_api._errors import NoTranscriptFound, TranscriptsDisabled
 import time
+import re
 
 # Configure page
 st.set_page_config(
@@ -123,13 +124,40 @@ def process_video_content(transcript, timestamps):
 def extract_transcript_details(youtube_video_url):
     """Extract and process transcript from YouTube video"""
     try:
-        # Validate YouTube URL format
-        if "youtube.com/watch?v=" not in youtube_video_url:
-            st.error("Please enter a valid YouTube URL (e.g., https://www.youtube.com/watch?v=xxxx)")
+        # List of possible URL patterns and their video ID extraction methods
+        url_patterns = [
+            # Standard watch URLs
+            r'(?:youtube\.com/watch\?v=|youtu\.be/|youtube\.com/embed/|youtube\.com/v/|youtube\.com/e/)([^&?#]+)',
+            # Short URLs
+            r'youtube\.com/shorts/([^&?#]+)',
+            # Live URLs
+            r'youtube\.com/live/([^&?#]+)',
+            # Attribution links
+            r'youtube\.com/attribution_link.*watch%3Fv%3D([^%&]+)',
+            # Plain video ID in path
+            r'youtube\.com/watch/([^&?#]+)',
+            # Mobile URLs
+            r'm\.youtube\.com/watch\?v=([^&?#]+)',
+        ]
+        
+        video_id = None
+        for pattern in url_patterns:
+            match = re.search(pattern, youtube_video_url)
+            if match:
+                video_id = match.group(1)
+                break
+                
+        if not video_id:
+            st.error("""
+            Invalid YouTube URL format. Supported formats include:
+            - Standard watch URLs (youtube.com/watch?v=...)
+            - Short URLs (youtu.be/...)
+            - Embedded URLs (youtube.com/embed/...)
+            - Short-form videos (youtube.com/shorts/...)
+            - Live streams (youtube.com/live/...)
+            """)
             return None, None
             
-        video_id = youtube_video_url.split("=")[1]
-        
         # Add longer delay for Hugging Face Spaces
         time.sleep(3)
         
